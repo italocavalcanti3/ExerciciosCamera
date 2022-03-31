@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, StatusBar, TouchableOpacity, Modal, LogBox, Image, PermissionsAndroid, Platform } from 'react-native';
 import { RNCamera } from 'react-native-camera';
 import CameraRoll from '@react-native-community/cameraroll';
-import { disableYellowBox } from 'console';
+import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
 
 LogBox.ignoreAllLogs();
 
@@ -26,6 +26,30 @@ export default function App() {
 
   function toggleCam(){
     setType(type === RNCamera.Constants.Type.front ? RNCamera.Constants.Type.back : RNCamera.Constants.Type.front);
+  }
+
+  function openAlbum() {
+    const options = { 
+      title: 'Selecione uma foto',
+      storageOptions: {
+        skipBackup: true,
+        path: 'images',
+      },
+      mediaType: 'photo',
+      saveToPhotos: true,
+    };
+
+    launchImageLibrary(options, (response) => {
+      if (response.didCancel) {
+        console.log('Abertura de álbum cancelado');
+      } else if (response.errorCode){
+        console.log('Deu erro: ' + response.errorCode);
+      } else {
+        setOpen(true);
+        setCapturedPhoto(response.assets[0].uri);
+
+      }
+    });
   }
 
   async function hasAndroidPermission() {
@@ -84,7 +108,7 @@ export default function App() {
               </TouchableOpacity>
              
               <TouchableOpacity
-              onPress={() => {}}
+              onPress={openAlbum}
               style={styles.capture}
               >
                 <Text>Álbum</Text>
