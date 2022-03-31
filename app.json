@@ -1,10 +1,4 @@
 {
-  "expo": {
-    "name": "ExerciciosCamera",
-    "slug": "ExerciciosCamera",
-    "version": "1.0.0",
-    "assetBundlePatterns": [
-      "**/*"
-    ]
-  }
+  "name": "ExerciciosCamera",
+  "displayName": "ExerciciosCamera"
 }
