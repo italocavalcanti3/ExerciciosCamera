@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, StatusBar, TouchableOpacity, Modal, LogBox, Image } from 'react-native';
+import { View, Text, StyleSheet, StatusBar, TouchableOpacity, Modal, LogBox, Image, PermissionsAndroid, Platform } from 'react-native';
 import { RNCamera } from 'react-native-camera';
+import CameraRoll from '@react-native-community/cameraroll';
+import { disableYellowBox } from 'console';
 
 LogBox.ignoreAllLogs();
 
@@ -18,12 +20,36 @@ export default function App() {
       console.log(data.uri);
 
       setCapturedPhoto(data.uri);
+      savePicture(data.uri);
     }
   }
 
   function toggleCam(){
     setType(type === RNCamera.Constants.Type.front ? RNCamera.Constants.Type.back : RNCamera.Constants.Type.front);
   }
+
+  async function hasAndroidPermission() {
+    const permission = PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE;
+  
+    const hasPermission = await PermissionsAndroid.check(permission);
+    if (hasPermission) {
+      return true;
+    }
+  
+    const status = await PermissionsAndroid.request(permission);
+    return status === 'granted';
+  }
+  
+  async function savePicture(data) {
+    if (Platform.OS === "android" && !(await hasAndroidPermission())) {
+      return;
+    }
+      CameraRoll.save(data, 'photo')
+      .then((res) => {
+        console.log('Salvo com sucesso: ' + res)
+      })
+      .catch((e) => console.log('Erro ao salvar: ' + e.code + ' - ' + e.message));
+  };
 
   return(
     <View style={styles.container}>
@@ -84,7 +110,7 @@ export default function App() {
             >
               <Text style={styles.fechar}>Fechar</Text>
               <Image 
-              style={{with:350, height:450, borderRadius: 15, resizeMode: 'contain'}}
+              style={{width:350, height:450, borderRadius: 15, resizeMode: 'contain'}}
               source={{uri: capturedPhoto}}
               />
             </TouchableOpacity>
